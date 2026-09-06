@@ -1,0 +1,94 @@
+  generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// core business models 
+model User {
+    id          String        @id @default(uuid())
+    name        String
+    password    String
+    role        String
+    email       String        @unique
+    phoneNumber String        @unique
+    createdAt   DateTime      @default(now())
+    ticket      Ticket[]
+    agentProfile AgentProfile?
+    comment     Comments[]
+
+    @@index([name])
+    @@index([role])
+}
+
+model AgentProfile {
+    userId           String             @id
+    categoryId       Int
+    ticketAssignment TicketAssignment[]
+
+    user     User       @relation(fields: [userId], references: [id])
+    category Categories @relation(fields: [categoryId], references: [id])
+
+    @@index([categoryId])
+}
+
+model Ticket {
+    id         String   @id @default(uuid())
+    title      String
+    desc       String
+    createdBy  String
+    priority   String
+    categoryId Int
+    status     String
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    ticketAssignment TicketAssignment[]
+    comment    Comments[]
+
+    user     User       @relation(fields: [createdBy], references: [id])
+    category Categories @relation(fields: [categoryId], references: [id])
+
+    @@index([createdBy])
+    @@index([priority])
+    @@index([categoryId])
+    @@index([status])
+    @@index([createdAt])
+}
+
+model TicketAssignment {
+    id         String   @id @default(uuid())
+    ticketId   String 
+    agentId    String 
+    assingedAt DateTime
+
+    ticket Ticket       @relation(fields: [ticketId], references: [id])
+    agent  AgentProfile @relation(fields: [agentId], references: [userId])
+
+    @@index([agentId])
+    @@index([ticketId])
+}
+
+model Comments {
+    id          String   @id @default(uuid())
+    ticketID    String
+    userId      String
+    commentDesc String
+    createdAt   DateTime @default(now())
+
+    ticket Ticket @relation(fields: [ticketID], references: [id])
+    user   User   @relation(fields: [userId], references: [id])
+
+    @@index([ticketID])
+}
+
+// Categories - ticket categories
+model Categories {
+    id           Int            @id @default(autoincrement())
+    categoryName String         @unique
+    createdAt    DateTime       @default(now())
+    agent        AgentProfile[]
+    ticket       Ticket[]       
+}
