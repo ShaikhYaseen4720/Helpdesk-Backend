@@ -8,12 +8,17 @@ const router = express.Router()
 
 router.post("/sign-up", 
         validate(registerSchema), 
-        asyncHandlerWrapper(authController.signUp())
+        asyncHandlerWrapper(authController.signUp)
     )
 
+router.get("/verify-user", 
+        asyncHandlerWrapper(authController.verifyUser)
+)
+
+router.post("/sign-in", 
+        validate(loginSchema), 
+        asyncHandlerWrapper(authController.signIn)
+)
 
 
-
-export {
-    router
-}
+export default router

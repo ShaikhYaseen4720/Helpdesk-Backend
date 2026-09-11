@@ -12,13 +12,16 @@ model User {
     id          String        @id @default(uuid())
     name        String
     password    String
-    role        String
+    role        String        @default("user")
     email       String        @unique
+    verified    Boolean       @default(false)
     phoneNumber String        @unique
     createdAt   DateTime      @default(now())
     ticket      Ticket[]
     agentProfile AgentProfile?
     comment     Comments[]
+    emailVerificationToken EmailVerificationToken[]
+    refreshToken RefreshToken[]
 
     @@index([name])
     @@index([role])
@@ -82,6 +85,28 @@ model Comments {
     user   User   @relation(fields: [userId], references: [id])
 
     @@index([ticketID])
+}
+
+model EmailVerificationToken {
+    id Int @id @default(autoincrement())
+    userId String
+    tokenHash String @unique
+    expires DateTime
+    usedAt DateTime?
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model RefreshToken {
+    id Int @id @default(autoincrement())
+    jti String @unique
+    userId String
+    familyId String
+    tokenHash String
+    revoke Boolean @default(false)
+    expires DateTime
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 // Categories - ticket categories

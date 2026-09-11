@@ -1,4 +1,4 @@
-import { number, z } from "zod"
+import { z } from "zod"
 
 const registerSchema = z.object({
     name : z.string().trim()
@@ -11,8 +11,8 @@ const registerSchema = z.object({
             .min(8, "Password must contain minimum of 8 characters")
             .max(64, "Password should exceed more then 64 characters"), 
 
-    number : z.string()
-            .regex("/^\d{10}$/", "Invalid number")
+    phoneNumber : z.string()
+            .regex(/^\d{10}$/, "Invalid number")
 })
 
 

@@ -1,15 +1,17 @@
 const globalErrorHandler = (err, req, res, next) => {
+    let serverErroMsg = "Internal server error"
     let statusCode = err.status || 500
-    let message = err.message || "Internal server error"
-
-    if(statusCode === 500){
-        console.log(err)
-    }
+    let message = err.message || serverErroMsg
+    // if(statusCode === 500){
+    //     console.log(err)
+    // }
+    
+    console.log(err)
 
     return res.status(statusCode).json({
         status : false,
         error : {
-            message : message
+            message : statusCode === 500 ? serverErroMsg : message
         }
     })
 }

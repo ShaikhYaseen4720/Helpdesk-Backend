@@ -1,6 +1,6 @@
 import { app } from "./app.js";
-import { PORT } from "./config/app.config.js";
+import { env } from "./config/env.js";
 
-app.listen(PORT, () => {
-    console.log(`server started at https://localhost:${PORT}`)
+app.listen(env.port, () => {
+    console.log(`server started at https://localhost:${env.port}`)
 })
