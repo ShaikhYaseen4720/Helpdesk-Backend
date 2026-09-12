@@ -20,5 +20,9 @@ router.post("/sign-in",
         asyncHandlerWrapper(authController.signIn)
 )
 
+router.post("/refresh-token", 
+        asyncHandlerWrapper(authController.refreshToken)
+)
+
 
 export default router

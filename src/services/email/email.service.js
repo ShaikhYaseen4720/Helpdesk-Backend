@@ -41,7 +41,23 @@ const sendVerficationEmail = async ({to, verificationToken}) => {
     })
 }
 
+const AlertMail = async (to) => {
+
+    await sendEmail({
+        to : to, 
+        subject : "Suspicious ativity detected on your account", 
+        text : "An suspicious activity has been detected on your account. Account has been logged out please relogin again",
+        html : `
+            <h2 style="color:red">Suspicious activty detected !!!</h2>
+            <p>We have encountered an suspicious activity on your account. Your account has been logged out by our policy</p>
+            <p>Please log In again</p>
+        `
+    })
+
+}
+
 export {
     sendEmail, 
-    sendVerficationEmail
+    sendVerficationEmail, 
+    AlertMail
 }

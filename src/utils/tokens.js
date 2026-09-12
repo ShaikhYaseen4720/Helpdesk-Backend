@@ -18,13 +18,13 @@ const generateVerificationToken = () => {
     return hashCryptoToken(token)
 }
 
-const generateSignInTokens = (user) => {
+const generateSignInTokens = ({userId, role}) => {
     const jti = generateJTI()
 
     let accessToken = jwt.sign(
         {
-            sub : user.id, 
-            role : user.role
+            sub : userId, 
+            role : role
         }, 
         env.jwtSecret, 
         {
@@ -34,7 +34,7 @@ const generateSignInTokens = (user) => {
 
     let refreshToken = jwt.sign(
         {
-            sub : user.id, 
+            sub : userId, 
             jti : jti
         },
         env.jwtSecret, 
@@ -46,8 +46,13 @@ const generateSignInTokens = (user) => {
     return {accessToken, refreshToken, jti}
 }
 
+const verifyJWTtoken = (token) => {
+    let claim = jwt.verify(token, env.jwtSecret)
+    return claim
+}
+
 
 export {
     generateVerificationToken, hashCryptoToken, 
-    generateSignInTokens
+    generateSignInTokens, verifyJWTtoken
 }

@@ -40,9 +40,22 @@ const signIn = async (req, res) => {
     })
 }
 
+const refreshToken = async (req, res) => {
+    let {token} = req.body
+
+    let tokens = await authService.tokenRefresh(token)
+
+    return res.json({
+        success : true, 
+        message : "Token refresh successful", 
+        tokens : tokens
+    })
+}
+
 
 export {
     signUp, 
     verifyUser, 
-    signIn
+    signIn,
+    refreshToken
 }

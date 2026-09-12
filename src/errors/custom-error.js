@@ -8,7 +8,7 @@ class AuthenticationError extends AppError{
 
 class validationError extends AppError{
     constructor(message = "Invalid data"){
-        super(message, 429)
+        super(message, 409)
     }
 }
 
