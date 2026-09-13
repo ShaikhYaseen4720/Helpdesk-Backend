@@ -6,8 +6,50 @@ import { hashPassword, comparePassword } from "../../utils/hash-password.js"
 import { generateFamilyID } from "../../utils/ids.js"
 import { appConfig } from "../../config/app-config.js"
 
+
+//helpers
+'Refresh token validation'
+const verifyRefreshToken = async (token) => {
+    let claim = null
+
+    //signature verification
+    try {
+        claim = tokenUtil.verifyJWTtoken(token)
+    } catch (error) {
+        console.log("signature verification failed")
+        throw new validationError("Invalid token")
+    }
+
+    //token check
+    let tokenRec = await authRepository.getRefreshToken(claim.jti)
+    if(!tokenRec){
+        console.log("Token not found")
+        throw validationError("Invalid Token")
+    }
+
+    // hash comparision
+    let {tokenHash} = tokenUtil.hashCryptoToken(token)
+    if(tokenHash !== tokenRec.tokenHash){
+        console.log("Hash not matching!!")
+        throw new validationError("Invalid Token")
+    }
+
+    // expiry check
+    if(new Date() > tokenRec.expires){
+        console.log("Token is expired")
+        throw new validationError("Invalid Token")
+    }
+
+    return tokenRec
+}
+
+
+//service functions 
 const signUp = async(data) => {
-    let response = {success : true, message : "is registerion is valid. Email has been sent to registered email."}
+    let response = {
+        success : true, 
+        message : "is registerion is valid. Email has been sent to registered email."
+    }
 
     let user = await authRepository.findByEmail(data.email)
     if(user){
@@ -44,6 +86,7 @@ const signUp = async(data) => {
      return response
 }
 
+'Email verification'
 const verifyToken = async (token) => {
     let {tokenHash} = tokenUtil.hashCryptoToken(token)
     
@@ -103,33 +146,10 @@ const signIn = async (email, password) => {
     return {accessToken, refreshToken}
 }
 
+'Refreshing the new AT and RT'
 const tokenRefresh = async (token) => {
-    let claim = null
+    let tokenRec = await verifyRefreshToken(token)
 
-    //signature verification
-    try {
-        claim = tokenUtil.verifyJWTtoken(token)
-    } catch (error) {
-        console.log("signature verification failed")
-        throw new validationError("Invalid token")
-    }
-
-    console.log(claim)
-    let tokenRec = await authRepository.getRefreshToken(claim.jti)
-    let {tokenHash} = tokenUtil.hashCryptoToken(token)
-
-    // hash comparision
-    if(tokenHash !== tokenRec.tokenHash){
-        console.log("Hash not matching!!")
-        throw new validationError("Invalid Token")
-    }
-
-    // expiry check
-    if(new Date() > tokenRec.expires){
-        console.log("Token is expired")
-        throw new validationError("Invalid Token")
-    }
-    
     //reuse detection
     if(tokenRec.revoke){
         console.log("Suspicious activity detected!!!\nOld refresh token is reused")
@@ -158,7 +178,7 @@ const tokenRefresh = async (token) => {
         role : user.role
     });
     
-    ({tokenHash} = tokenUtil.hashCryptoToken(refreshToken))
+    let {tokenHash} = tokenUtil.hashCryptoToken(refreshToken)
 
     await authRepository.storeRefreshToken({
         jti : jti, 
@@ -171,10 +191,22 @@ const tokenRefresh = async (token) => {
     return {accessToken, refreshToken}
 }
 
+const signOut = async (token) => {
+    const tokenRec = await verifyRefreshToken(token)
+
+    if(tokenRec.revoke){
+        console.log("Old token received")
+        throw new validationError("Invalid token")
+    }
+
+    await authRepository.revokeTokenFamily(tokenRec.familyId)
+}
+
 
 export {
     signUp, 
     verifyToken, 
     signIn, 
-    tokenRefresh
+    tokenRefresh, 
+    signOut
 }

@@ -52,10 +52,21 @@ const refreshToken = async (req, res) => {
     })
 }
 
+const signOut  = async (req, res) => {
+    let {token} = req.body
+
+    await authService.signOut(token)
+
+    return res.json({
+        success : true, 
+        message : "Signout successfully"
+    })
+}
 
 export {
     signUp, 
     verifyUser, 
     signIn,
-    refreshToken
+    refreshToken, 
+    signOut
 }

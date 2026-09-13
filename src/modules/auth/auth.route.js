@@ -24,5 +24,8 @@ router.post("/refresh-token",
         asyncHandlerWrapper(authController.refreshToken)
 )
 
+router.post("/sign-out",
+        asyncHandlerWrapper(authController.signOut))
+
 
 export default router
